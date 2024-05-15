@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  #root {
+    @apply h-full;
+  }
+  html,
+  body {
+    @apply h-full;
+    @apply select-none;
+    @apply bg-transparent;
+    @apply font-mono antialiased text-white;
+    @apply overflow-hidden;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 15px; /* Width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgb(50, 50, 50); /* Track color */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(70, 70, 70); /* Thumb color */
+  border: 3px solid rgb(50, 50, 50);
+  border-radius: 12px; /* Rounded corners for the thumb */
+}
