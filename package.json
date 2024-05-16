@@ -5,6 +5,7 @@
   "main": "./out/main/index.js",
   "author": "example.com",
   "homepage": "https://electron-vite.org",
+  "productName": "Ace",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -29,6 +30,7 @@
     "postcss": "^8.4.38",
     "react-icons": "^5.2.1",
     "react-pdf": "^8.0.2",
+    "react-quick-pinch-zoom": "^5.1.0",
     "react-resizable-panels": "^2.0.19",
     "react-resize-detector": "^10.0.1",
     "react-sizeme": "^3.0.2",

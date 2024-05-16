@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
 import 'react-pdf/dist/esm/Page/TextLayer.css'
@@ -10,71 +10,61 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 export const PDFView = ({ pdfURL }) => {
   const [numPages, setNumPages] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const containerRef = useRef(null)
-  const [scale, setScale] = useState(1)
-  const defaultWidth = 2400
-  const maxScale = 0.4
-  const maxWidth = defaultWidth * maxScale
-
-  useEffect(() => {
-    const updateScale = () => {
-      if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth
-        const newScale = containerWidth / defaultWidth
-        setScale(newScale > maxScale ? maxScale : newScale)
-      }
-    }
-
-    const resizeObserver = new ResizeObserver(updateScale)
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current)
-    }
-
-    return () => {
-      if (containerRef.current) {
-        resizeObserver.unobserve(containerRef.current)
-      }
-    }
-  }, [])
+  const [scale, setScale] = useState(1.0) // Initialize scale state
+  const initialWidth = 405
+  const minWidth = initialWidth / 4
+  const maxWidth = initialWidth * 4
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages)
-    setLoading(false)
   }
 
+  useEffect(() => {
+    window.electronAPI.onMenuAction((event, action) => {
+      console.log(`Received action: ${action}`) // Add this line
+      switch (action) {
+        case 'zoom-in':
+          scaleUp()
+          break
+        case 'zoom-out':
+          scaleDown()
+          break
+        case 'zoom-reset':
+          scaleReset()
+          break
+      }
+    })
+  }, [])
+
+  const scaleUp = () => {
+    setScale((prevScale) => Math.min(prevScale + 0.1, maxWidth / initialWidth)) // Increase scale with a maximum limit
+  }
+
+  const scaleDown = () => {
+    setScale((prevScale) => Math.max(prevScale - 0.1, minWidth / initialWidth)) // Decrease scale with a minimum limit
+  }
+
+  const scaleReset = () => {
+    const windowWidth = window.innerWidth
+    setScale((windowWidth * 0.45) / initialWidth)
+  }
+
+  useEffect(() => {
+    scaleReset()
+  }, [])
+
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: '100%',
-        maxWidth: `${maxWidth}px`,
-        overflow: 'hidden', // Ensure no scrollbars
-        position: 'relative'
-      }}
-    >
-      {loading && <div className="loading-indicator">Loading...</div>}
-      <Document file={pdfURL} onLoadSuccess={onDocumentLoadSuccess} renderMode="svg">
-        {Array.from(new Array(numPages), (_el, index) => (
-          <div
-            key={`page_wrapper_${index + 1}`}
-            style={{
-              transform: `scale(${scale})`,
-              transformOrigin: 'top left',
-              width: `${defaultWidth}px`, // This keeps the scale based on defaultWidth
-              marginBottom: `${8 / scale}px`, // Adjust margin based on scale
-              transition: 'transform 0.2s linear' // Smooth scaling
-            }}
-          >
-            <Page
-              className="pdf-page"
-              key={`page_${index + 1}`}
-              pageNumber={index + 1}
-              width={defaultWidth} // Fixed width, scaling will handle the size
-            />
-          </div>
+    <Document file={pdfURL} onLoadSuccess={onDocumentLoadSuccess}>
+      {numPages &&
+        Array.from(new Array(numPages), (_el, index) => (
+          <Page
+            className="mb-2"
+            key={`page_${index + 1}`}
+            pageNumber={index + 1}
+            scale={scale}
+            width={initialWidth}
+          />
         ))}
-      </Document>
-    </div>
+    </Document>
   )
 }

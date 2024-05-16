@@ -17,7 +17,7 @@
 }
 
 ::-webkit-scrollbar {
-  width: 15px; /* Width of the scrollbar */
+  width: 16px; /* Width of the scrollbar */
 }
 
 ::-webkit-scrollbar-track {
@@ -25,7 +25,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgb(70, 70, 70); /* Thumb color */
-  border: 3px solid rgb(50, 50, 50);
+  background-color: rgb(90, 90, 90); /* Thumb color */
+  border: 4px solid rgb(50, 50, 50);
   border-radius: 12px; /* Rounded corners for the thumb */
+}
+
+.background-color {
+  background-color: rgb(28, 28, 28);
 }

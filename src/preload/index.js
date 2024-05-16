@@ -1,13 +1,5 @@
-import { contextBridge } from 'electron'
+const { contextBridge, ipcRenderer } = require('electron')
 
-if (!process.contextIsolated) {
-  throw new Error('contextIsolated must be enabled in the BrowserWindow')
-}
-
-try {
-  contextBridge.exposeInMainWorld('context', {
-    // TODO
-  })
-} catch (error) {
-  console.error(error)
-}
+contextBridge.exposeInMainWorld('electronAPI', {
+  onMenuAction: (callback) => ipcRenderer.on('menu-action', callback)
+})
