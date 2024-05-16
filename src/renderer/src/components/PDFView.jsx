@@ -10,18 +10,25 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 export const PDFView = ({ pdfURL }) => {
   const [numPages, setNumPages] = useState(null)
-  const [scale, setScale] = useState(1.0) // Initialize scale state
+  const [pageVisible, setPageVisible] = useState(true)
+  const [scale, setScale] = useState(1.0)
+  const [newScale, setNewScale] = useState(1.0)
+
+  // Config variables
   const initialWidth = 405
-  const minWidth = initialWidth / 4
-  const maxWidth = initialWidth * 4
+  const stepSize = 0.5
+  const magnifierMax = 4
+
+  // Extreme controls
+  const minWidth = initialWidth / magnifierMax
+  const maxWidth = initialWidth * magnifierMax
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages)
   }
 
   useEffect(() => {
-    window.electronAPI.onMenuAction((event, action) => {
-      console.log(`Received action: ${action}`) // Add this line
+    const handleZoom = (_event, action) => {
       switch (action) {
         case 'zoom-in':
           scaleUp()
@@ -33,38 +40,83 @@ export const PDFView = ({ pdfURL }) => {
           scaleReset()
           break
       }
-    })
+    }
+    console.log('Adding menu action listener')
+    window.electronAPI.onMenuAction(handleZoom)
+
+    return () => {
+      window.electronAPI.removeMenuActionListener()
+    }
   }, [])
 
   const scaleUp = () => {
-    setScale((prevScale) => Math.min(prevScale + 0.1, maxWidth / initialWidth)) // Increase scale with a maximum limit
+    setNewScale((prevScale) => Math.min(prevScale + stepSize, maxWidth / initialWidth))
   }
 
   const scaleDown = () => {
-    setScale((prevScale) => Math.max(prevScale - 0.1, minWidth / initialWidth)) // Decrease scale with a minimum limit
+    setNewScale((prevScale) => Math.max(prevScale - stepSize, minWidth / initialWidth))
   }
 
   const scaleReset = () => {
     const windowWidth = window.innerWidth
-    setScale((windowWidth * 0.45) / initialWidth)
+    setNewScale((windowWidth * 0.45) / initialWidth)
   }
 
   useEffect(() => {
     scaleReset()
   }, [])
 
+  const isLoading = newScale !== scale
+
   return (
     <Document file={pdfURL} onLoadSuccess={onDocumentLoadSuccess}>
       {numPages &&
         Array.from(new Array(numPages), (_el, index) => (
-          <Page
-            className="mb-2"
-            key={`page_${index + 1}`}
-            pageNumber={index + 1}
-            scale={scale}
-            width={initialWidth}
-          />
+          <div key={`page_div_${index}`}>
+            <Page
+              className={`mb-2 ${pageVisible ? 'visible' : 'hidden'}`}
+              key={`page_${index + 1}`}
+              pageNumber={index + 1}
+              scale={pageVisible ? scale : newScale}
+              width={initialWidth}
+              onRenderSuccess={
+                pageVisible
+                  ? null
+                  : () => {
+                      if (isLoading) {
+                        setPageVisible(!pageVisible)
+                        setScale(newScale)
+                      }
+                    }
+              }
+            />
+            <Page
+              className={`mb-2 ${pageVisible ? 'hidden' : 'visible'}`}
+              key={`pages_${index + 1}`}
+              pageNumber={index + 1}
+              scale={pageVisible ? newScale : scale}
+              width={initialWidth}
+              onRenderSuccess={
+                pageVisible
+                  ? () => {
+                      if (isLoading) {
+                        console.log(
+                          'this is new scale: ' + newScale + ' and this is scale: ' + scale
+                        )
+                        setPageVisible(!pageVisible)
+                        setScale(newScale)
+                      }
+                    }
+                  : null
+              }
+            />
+          </div>
         ))}
     </Document>
   )
 }
+
+// Have two pages, positioned on top of each other. One is hidden.
+// When the user changes the scale, it effects the hidden page.
+// Once the hidden page renders the scale change, it becomes triggers the visible page to hide,
+// and turns itself visible. If the user scales again, this process repeats itself.

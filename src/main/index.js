@@ -3,6 +3,7 @@ import { BrowserWindow, Menu, app, shell } from 'electron'
 import { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 import { mainMenu } from './lib/menuCreator'
+const electronLocalshortcut = require('electron-localshortcut')
 
 app.setName('Ace')
 
@@ -49,6 +50,13 @@ function createWindow() {
   }
 
   Menu.setApplicationMenu(mainMenu)
+
+  // The rest of the shortcuts are registered inside of the menu. For some reason,
+  // the command + minus shortcut does not register properly with accelerators, so
+  // it is done manually here.
+  electronLocalshortcut.register(mainWindow, 'CommandOrControl+-', () => {
+    mainWindow.webContents.send('menu-action', 'zoom-out')
+  })
 }
 
 // This method will be called when Electron has finished

@@ -17,23 +17,22 @@ const template = [
       { role: 'reload' },
       {
         label: 'Zoom in',
-        accelerator: 'CmdOrCtrl+=',
-        click: (menuItem, browserWindow) => {
-          console.log('zoom in trigger from menu creator')
+        accelerator: 'CmdOrCtrl+Plus',
+        click: (_menuItem, browserWindow) => {
           browserWindow.webContents.send('menu-action', 'zoom-in')
         }
       },
       {
         label: 'Zoom out',
-        accelerator: 'CmdOrCtrl+_',
-        click: (menuItem, browserWindow) => {
-          browserWindow.webContents.send('menu-action', 'zoom-out')
+        accelerator: 'CmdOrCtrl+-',
+        click: (_menuItem, _browserWindow) => {
+          'Dummy function to avoid error'
         }
       },
       {
         label: 'Reset zoom',
         accelerator: 'CmdOrCtrl+0',
-        click: (menuItem, browserWindow) => {
+        click: (_menuItem, browserWindow) => {
           browserWindow.webContents.send('menu-action', 'zoom-reset')
         }
       }
@@ -42,12 +41,12 @@ const template = [
   {
     label: 'View',
     submenu: [
-      { role: 'reload' }, 
+      { role: 'reload' },
       { role: 'forceReload' },
       {
         label: 'Toggle Developer Tools',
         accelerator: 'CmdOrCtrl+Shift+I',
-        click: (menuItem, browserWindow) => {
+        click: (_menuItem, browserWindow) => {
           if (browserWindow) {
             browserWindow.webContents.toggleDevTools()
           }

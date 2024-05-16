@@ -33,3 +33,11 @@
 .background-color {
   background-color: rgb(28, 28, 28);
 }
+
+.changer {
+  visibility: hidden;
+}
+
+.static {
+  visibility: visible;
+}

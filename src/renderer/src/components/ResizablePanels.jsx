@@ -9,12 +9,12 @@ export const ResizablePanels = ({ children }) => {
   return (
     <PanelGroup direction="horizontal">
       {/* PDF Viewer */}
-      <Panel defaultSize={50} minSize={30} collapsible={true}>
+      <Panel defaultSize={50} minSize={30}>
         {children[0]}
       </Panel>
       <PanelResizeHandle />
       {/* Notes Viewer */}
-      <Panel defaultSize={50} minSize={30} collapsible={true}>
+      <Panel defaultSize={50} minSize={30}>
         {children[1]}
       </Panel>
     </PanelGroup>
